@@ -96,3 +96,7 @@ document.querySelectorAll('#sw button').forEach(function(b){b.onclick=function()
 extra = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><style>.dist{font:600 12px -apple-system,sans-serif;background:#fff;border:1px solid #475569}</style>'
 open("today.html", "w").write(HEAD.format(t="Сегодня: Dotonbori - Osaka", extra=extra) + body + "</div>" + js + '<script src="lightbox.js?v=4" defer></script></body></html>')
 print("today ok", NOW)
+s = open("index.html").read()
+b = '<div class="alert" style="border-color:#be185d"><b style="color:#be185d">Сегодня, сб 24.10:</b> прогулка по Dotonbori и центру + где замок → <a href="today.html"><b>открыть</b></a></div>'
+if "today.html" not in s:
+    open("index.html", "w").write(s.replace('</header>', '</header>' + b, 1))
