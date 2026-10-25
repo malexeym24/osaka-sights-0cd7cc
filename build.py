@@ -71,6 +71,11 @@ CAP = {
     "nara-3.jpg": "Олень среди каменных фонарей", "nara-4.jpg": "Олени в Nara свободно ходят по городу",
     "himeji-1.jpg": "Замок Himeji", "himeji-9.jpg": "Главная башня и малые башни", "himeji-3.jpg": "Himeji в ноябре",
     "himeji-7.jpg": "Himeji, конец октября (25.10.2024)",
+    "kaiyukan-1.jpg": "Здание аквариума у залива", "kaiyukan-2.jpg": "Главный аквариум во всю стену",
+    "kaiyukan-3.jpg": "Тоннель под водой", "kaiyukan-4.jpg": "Скат", "kaiyukan-5.jpg": "Зал медуз",
+    "kaiyukan-6.jpg": "Аквариум и порт сверху", "tempozan-1.jpg": "Колесо обозрения Tempozan, 112,5 м",
+    "tempozan-2.jpg": "Колесо и набережная со стороны воды",
+    "expo-3.jpg": "Японский сад в парке Expo'70", "expo-4.jpg": "Пруд в парке Expo'70",
 }
 
 AREAS = {
@@ -79,6 +84,7 @@ AREAS = {
     "minami": ("Юг · Namba, Shinsekai, Tennoji", "9-17 мин по красной линии Midosuji"),
     "city": ("Ещё в городе", "Если останется время"),
     "out": ("За город на полдня", "35-60 мин на поезде"),
+    "port": ("Залив · аквариум", "~25 мин на метро"),
 }
 RAIN = {"roof": ("🏠 под крышей", "в дождь - да"), "covered": ("☂️ крытая улица", "в дождь - да"),
         "mixed": ("⛅ часть под крышей", "в дождь - частично"), "open": ("🌳 под открытым небом", "лучше без дождя")}
@@ -89,13 +95,15 @@ BY = {p["id"]: p for p in P}
 # hours / price / closed / source - filled from the verification pass (see HRS below)
 from hours import HRS
 for k, v in HRS.items():
-    BY[k].update(v)
+    if k in BY: BY[k].update(v)
 
 # ---------- day plans ----------
 ST = {  # station points for drawing train legs (approximate)
  "HUME": (34.700595, 135.499818), "MMORI": (34.6978, 135.5114), "TENMA": (34.6902, 135.5165), "TANI4": (34.68255, 135.51775),
  "NAKAZ": (34.7072, 135.5056), "TEN6": (34.710291, 135.51085),
  "UME": (34.7025, 135.4982), "YODO": (34.6930, 135.5010), "HOMM": (34.6823, 135.5009), "SHINS": (34.6750, 135.5009),
+ "SAKAISUJI": (34.681875, 135.506933), "HOMMC": (34.682018, 135.498721), "AWAZA": (34.681632, 135.486251), "KUJO": (34.676271, 135.473669),
+ "BENTEN": (34.668425, 135.46209), "ASASHIO": (34.660863, 135.448813), "OSAKAKO": (34.65393, 135.434414),
  "NAMBA": (34.6664, 135.5008), "DAIK": (34.6527, 135.4983), "DOBU": (34.6465, 135.5059), "TENNO": (34.6467, 135.5134),
 }
 W = json.load(open("walk.json"))["legs"]
@@ -106,48 +114,30 @@ def walk(day, a, b):
     raise KeyError((day, a, b))
 def train(color, *names):
     return dict(kind="train", color=color, coords=[list(ST[n]) for n in names])
-PURPLE, RED = "#7c3aed", "#dc2626"
+PURPLE, RED, GREEN = "#7c3aed", "#dc2626", "#16a34a"
 
 DAYS = [
- dict(key="sat", label="Сб 24.10", title="Суббота 24.10 · замок, пока сухо",
-      wx="Дождь до ~12-13 ч, потом облачно и в основном сухо, 22-25°. Закат 17:13.",
-      why="Суббота после обеда - единственное сухое окно за три дня, а замок и сад под открытым небом. Начинаем с музея под крышей, пока дождь заканчивается. И только в сб-вс пускают внутрь старых башен замка 1620 года.",
+ dict(key="sun", label="Вс 25.10", title="Сегодня, вс 25.10 · замок, потом аквариум и закат у залива",
+      wx="Облачно, временами дождь (JMA 80% до 18 ч), но модель после 13 ч даёт почти сухо до ~20 ч, ~21-22°. Закат 17:11.",
+      why="Замок ты ещё не видел, а старые башни замка открыты внутри только в выходные - сегодня последний шанс. От станции у замка зелёная линия Chuo идёт прямо к аквариуму, без пересадок: закат у воды и аквариум под крышей до 20:00.",
       steps=[
-        ("12:00", None, "Из отеля 7 мин пешком до станции <b>Higashi-Umeda</b>, линия <b>Tanimachi (фиолетовая)</b>, платформа 1, поезд на <b>Yaominami (八尾南)</b>. Остановки: Minami-morimachi → Temmabashi → <b>Tanimachi 4-chome</b>, 6 мин, поезда каждые ~6 мин. Выход 9.",
-         [("📍 Higashi-Umeda", gm("Higashi-Umeda Station")), ("🚇 Маршрут", gdir("Osaka Museum of History"))]),
-        ("12:15", "history", "Музей истории, ~1 ч. Начни с верхнего этажа (дворец Naniwa), из окон - замок.", []),
-        ("13:20", "castle", "6 мин до ворот <b>Otemon</b> → внутрь башен <b>Sengan и Tamon</b> (билет вместе с садом, продают до 15:30) → сад <b>Nishinomaru</b> (вход до 16:30) → ворота Sakuramon и камень <b>Tako-ishi</b> → главная башня (вход до 17:30).", []),
-        ("16:10", None, "<b>На закат, вариант А:</b> ~20 мин пешком до <b>Temmabashi</b>, Tanimachi (фиолетовая) на Dainichi (大日), 2 остановки до <b>Higashi-Umeda</b> (~5 мин), оттуда ~18 мин пешком до Umeda Sky. Или такси от замка, ~15 мин. <b>Вариант Б</b>, без спешки: остаться в замке, смотровая на 8 этаже башни открыта до 18:00.",
-         [("📍 Temmabashi", gm("Temmabashi Station Osaka Metro")), ("🚕 Такси до Umeda Sky", gdir("Umeda Sky Building", "driving", "Osaka Castle"))]),
-        ("16:50", "umeda-sky", "Закат в <b>17:13</b> с открытой крыши. В субботу на закат может быть очередь к лифту.", []),
-        ("17:40", None, "Обратно в отель пешком ~15 мин.", [("🚶 До отеля", gdir(HOTEL, "walking", "Umeda Sky Building"))]),
+        ("старт", None, "От отеля 7 мин до станции <b>Higashi-Umeda</b>, линия <b>Tanimachi (фиолетовая)</b>, платформа 1, поезд на <b>Yaominami (八尾南)</b>: Minami-morimachi → Temmabashi → <b>Tanimachi 4-chome</b>, 6 мин, поезда каждые ~6 мин. Выход 9.",
+         [("📍 Higashi-Umeda", gm("Higashi-Umeda Station")), ("🚇 Маршрут к замку", gdir("Osaka Castle Otemon Gate"))]),
+        ("~13:45", "castle", "6 мин до ворот <b>Otemon</b> → внутрь башен <b>Sengan и Tamon</b> (билет вместе с садом, продают до 15:30, только сб-вс) → сад <b>Nishinomaru</b> (вход до 16:30) → ворота Sakuramon и камень <b>Tako-ishi</b> → главная башня (вход до 17:30).", []),
+        ("~16:15", None, "~16 мин пешком обратно к <b>Tanimachi 4-chome</b>, <b>зелёная Chuo line</b>, платформа 2, поезд на Yumeshima или Cosmosquare, <b>без пересадок</b> 7 остановок до <b>Osakako</b>, 15 мин (по Yahoo 16:18 → 16:33, 16:25 → 16:40).",
+         [("🚇 От замка к аквариуму", gdir("Osaka Aquarium Kaiyukan", "transit", "Tanimachi 4-chome Station"))]),
+        ("~16:45", "kaiyukan", "Выход 1, 5-10 мин пешком к колесу обозрения. Закат в <b>17:11</b> на набережной у воды, потом аквариум: открыт до 20:00, вход до 19:00.", []),
+        ("~19:00", None, "Обратно ~25 мин: Osakako, Chuo line, платформа 1, на Gakken-Nara-Tomigaoka, 5 остановок до <b>Hommachi</b>, пересадка на красную <b>Midosuji</b> на Shin-Osaka, 2 остановки до <b>Umeda</b> (по Yahoo 19:05 → 19:30).",
+         [("🚇 До отеля", gdir(HOTEL, "transit", "Osakako Station"))]),
       ],
       legs=[walk("sat", "H", "HUME"), train(PURPLE, "HUME", "MMORI", "TENMA", "TANI4"), walk("sat", "TANI4", "HIST"),
-            walk("sat", "HIST", "OTEMON"), walk("sat", "OTEMON", "TOWER"), walk("sat", "TOWER", "NISHI"), walk("sat", "NISHI", "TENMA"),
-            train(PURPLE, "TENMA", "MMORI", "HUME"), walk("sat", "HUME", "SKY"), walk("sat", "SKY", "H")],
-      pins=["history", "castle", "umeda-sky"]),
- dict(key="sun", label="Вс 25.10", title="Воскресенье 25.10 · юг города, к вечеру под крышу",
-      wx="Тепло 25-29°, дождь с перерывами, с ~15-16 ч сильнее. Закат 17:11.",
-      why="Дождливый день: крытый рынок, частично крытые улицы Shinsekai, а к сильному дождю - смотровая Harukas под крышей. Всё на одной красной линии метро.",
-      steps=[
-        ("12:00", None, "Из отеля 5 мин до станции <b>Umeda</b>, линия <b>Midosuji (красная)</b>, платформа 1, поезд на <b>Tennoji</b>: Yodoyabashi → Hommachi → Shinsaibashi → <b>Namba</b>, 9 мин.",
-         [("📍 Umeda (Midosuji)", gm("Umeda Station Osaka Metro Midosuji Line")), ("🚇 Маршрут", gdir("Namba Yasaka Shrine"))]),
-        ("12:25", "yasaka", "От Namba 11 мин пешком. Голова льва - 15-20 мин.", []),
-        ("12:55", "dotonbori", "16 мин пешком до моста Ebisubashi: канал и вывески днём, рядом переулок Hozenji.", []),
-        ("13:40", "kuromon", "12 мин пешком. Обед у прилавков.", []),
-        ("14:40", "shinsekai", "~18 мин пешком на юг (или метро Sakaisuji от Nippombashi 1 остановка до Ebisucho). Башня Tsutenkaku (билет на время), кушикацу.", []),
-        ("15:50", "harukas", "~19 мин пешком или метро Midosuji Dobutsuen-mae → Tennoji, 1 остановка. К сильному дождю ты уже под крышей. Закат в 17:11, если облака дадут.", []),
-        ("17:30", None, "<b>Tennoji → Umeda</b>, Midosuji (красная), платформа 3, поезд на Minoh-kayano (箕面萱野), 16 мин.",
-         [("🚇 До отеля", gdir(HOTEL, "transit", "Tennoji Station Osaka Metro"))]),
-      ],
-      legs=[walk("sun", "H", "UME"), train(RED, "UME", "YODO", "HOMM", "SHINS", "NAMBA"), walk("sun", "NAMBA", "YASAKA"),
-            walk("sun", "YASAKA", "EBISU"), walk("sun", "EBISU", "HOZENJI"), walk("sun", "HOZENJI", "KUROMON"),
-            walk("sun", "KUROMON", "TSUTEN"), walk("sun", "TSUTEN", "HARUKAS"),
-            train(RED, "TENNO", "DOBU", "DAIK", "NAMBA", "SHINS", "HOMM", "YODO", "UME")],
-      pins=["yasaka", "dotonbori", "kuromon", "shinsekai", "harukas"]),
+            walk("sat", "HIST", "OTEMON"), walk("sat", "OTEMON", "TOWER"), walk("sat", "TOWER", "NISHI"), walk("sun2", "NISHI", "TANI4"),
+            train(GREEN, "TANI4", "SAKAISUJI", "HOMMC", "AWAZA", "KUJO", "BENTEN", "ASASHIO", "OSAKAKO"), walk("sun2", "OSAKAKO", "KAIYUKAN"),
+            train(RED, "HOMMC", "YODO", "UME")],
+      pins=["castle", "history", "kaiyukan"]),
  dict(key="mon", label="Пн 26.10", title="Понедельник 26.10 · после выезда, до поезда в аэропорт",
-      wx="Дождь, днём местами сильный, ветер.",
-      why="Короткое окно рядом с отелем и под крышей: самая длинная крытая улица Японии ведёт прямо к святилищу. Чемодан ждёт в отеле, поезд Haruka в аэропорт уходит из-под отеля.",
+      wx="Дождь весь день, с полудня до вечера местами сильный с грозой (JMA 80-90%), ветер.",
+      why="Короткое окно рядом с отелем и под крышей: самая длинная крытая улица Японии ведёт прямо к святилищу. Чемодан ждёт в отеле, поезд Haruka в аэропорт уходит из-под отеля. Если хочется вида - вместо этого смотровая Abeno Harukas (под крышей, 17 мин по красной линии).",
       steps=[
         ("12:00", None, "Выезд (по osaka-info - до 12:00), чемодан на хранение в отеле. 7 мин до <b>Higashi-Umeda</b>, <b>Tanimachi (фиолетовая)</b>, платформа 2, поезд на <b>Dainichi (大日)</b>: Nakazakicho → <b>Tenjimbashisuji 6-chome</b>, 3 мин.",
          [("🚇 Маршрут", gdir("Tenjimbashisuji 6-chome Station"))]),
@@ -238,10 +228,10 @@ def index():
         areas += f'<h3 id="a-{a}">{E(t)}</h3><div class="hint">{E(s)}</div>' + "".join(tile(p) for p in P if p["area"] == a)
     markers = json.dumps([dict(n=p["n"], id=p["id"], name=p["name"], lat=p["ll"][0], lng=p["ll"][1], area=p["area"]) for p in P], ensure_ascii=False)
     days = json.dumps({d["key"]: dict(legs=d["legs"], pins=d["pins"]) for d in DAYS}, ensure_ascii=False)
-    body = f'''<header><h1>Osaka: что посмотреть</h1><div class="sub">Сб 24 - пн 26.10.2026 · отель Granvia (станция JR Osaka) · срез {SRC_DATE}</div></header>
-<div class="alert"><b>Коротко.</b> Суббота после обеда - единственное сухое окно, поэтому <b>сб = замок</b> (музей истории → замок → сад → закат на Umeda Sky). <b>Вс = юг</b> под крышей: голова льва, Dotonbori днём, рынок Kuromon, Shinsekai, вечером смотровая Harukas. <b>Пн</b> после выезда - крытая улица Tenjinbashisuji до святилища Tenmangu рядом с отелем, потом Haruka в аэропорт. Музей быта эпохи Edo (Kurashi no Konjakukan) закрыт на ремонт до 05.01.2027, поэтому его нет.</div>
+    body = f'''<header><h1>Osaka: что посмотреть</h1><div class="sub">Вс 25 - пн 26.10.2026 · отель Granvia (станция JR Osaka) · срез {SRC_DATE}</div></header>
+<div class="alert"><b>Коротко.</b> Убрал то, что ты уже видел: Dotonbori с Hozenji, Umeda Sky и вчерашнюю прогулку. Добавил <b>аквариум Kaiyukan</b>. <b>Сегодня</b>: замок (старые башни внутри открыты только в выходные), от него зелёная линия без пересадок к аквариуму, закат у залива в 17:11. <b>Пн</b> после выезда: крытая улица Tenjinbashisuji рядом с отелем, потом Haruka в аэропорт. Музей быта эпохи Edo закрыт на ремонт до 05.01.2027, его нет.</div>
 <div class="card"><h2>Погода</h2><table class="wxt">{wx}</table><p class="hint">{WX_NOTE}</p></div>
-<div class="vsw" id="sw"><button data-k="all" class="on">Все места</button><button data-k="sat">Сб 24</button><button data-k="sun">Вс 25</button><button data-k="mon">Пн 26</button><button data-k="out">За город</button></div>
+<div class="vsw" id="sw"><button data-k="all" class="on">Все места</button><button data-k="sun">Вс 25</button><button data-k="mon">Пн 26</button><button data-k="out">За город</button></div>
 <div id="map"></div>
 <div class="legend">Синяя H - отель. Сплошная линия - пешком, пунктир - метро (цвет линии). Нажми на номер - откроется место.</div>
 <div class="btns"><button class="btn o" id="me">📍 Показать, где я</button></div>
